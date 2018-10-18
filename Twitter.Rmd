@@ -1,0 +1,94 @@
+---
+title: "TwitterData"
+author: "Blake"
+date: "10/17/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(ROAuth)
+library(twitteR)
+library(cronR)
+library(tidyr)
+library(dplyr)
+library(data.table)
+library(tidyverse)
+library(ggmap)
+library(DT)
+library(knitr)
+devtools::install_github("dkahle/ggmap")
+
+api_key <- "rJ2KDbnmw8lzOSv6c60q9wxcJ"
+
+api_secret <- "uEMuuqB9s1KOznBzvKaCrxzxWhocZOEKWZqt5waKdGEGLFAgVd"
+
+access_token <- "892830098847657985-c0H2mByol33apCzPdcBZgLT7oOYFlyO"
+
+access_token_secret <- "dL6L3Tn20YtVSl8legwyqlJXc2buQGMC0NSUmHvFqVhZR"
+
+setup_twitter_oauth(api_key, api_secret, access_token, access_token_secret)
+
+TL <- searchTwitter("Elon Musk - filter:", n=750)
+TL <- do.call("rbind", lapply(TL, as.data.frame))
+users <- lookupUsers(TL$screenName)
+users_df <- twListToDF(users)
+table(users_df[1:10, 'location'])
+location <- select(users_df, 12)
+location[location==""] <- NA
+location1 <- setDT(location, keep.rownames = TRUE)[]
+register_google(key = "AIzaSyDui9vr08_2mRjdQPkDFb72whshzhDAD2o") 
+geo <- geocode(location = location$location, output="latlon", source="google")
+locale <- c(geo, location)
+locale <- as.data.frame(locale)
+locale1 <- na.omit(locale)
+colnames(locale1)[3] <- "screenName"
+data <- merge(TL, locale1, by="screenName")
+data1 <- select(data, 1, 2, 17, 18)
+
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+library(tm)
+library(SnowballC)
+library(wordcloud)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(topicmodels)
+library(data.table)
+Sys.setlocale("LC_ALL", "C")
+data1$text <- removePunctuation(data2$text)
+data1$text  <-tolower(data1$text)
+data1$text <-removeNumbers(data1$text)
+data1$text <-removeWords(data1$text, stopwords("en"))
+data1$text <- gsub("http.*","",  data1$text)
+data1$text <- gsub("https.*","", data1$text)
+data1$text <- gsub("[[:punct:]]", "", data1$text)
+data1$text <- str_replace(data1$text,"rt*","")
+data1$text <- str_replace(data1$text,"<*","")
+str <- ":215H@#e5.:l[l[}o%^&*3,-7 55W(o]]43r6759l::~!1d424`$£"
+data1$text<- lapply( data1$text , gsub , pattern = "[^,a-zA-Z\\s]" , replacement = "" , perl = TRUE )
+ 
+
+corpus <- Corpus(VectorSource(data1$text))
+corpus <- tm_map(corpus, stripWhitespace)
+corpus <- tm_map(corpus, tolower)
+corpus <- tm_map(corpus, removeWords, stopwords('english'))
+corpus <- tm_map(corpus, stemDocument)
+corpus <- tm_map(corpus, removeNumbers)
+corpus <- tm_map(corpus, removePunctuation)
+tdm.corpus <- TermDocumentMatrix(corpus)
+tdm.corpus <- removeSparseTerms(tdm.corpus, 0.99)
+positive <- readLines("positive-words.txt")
+negative <- readLines("negative-words.txt")
+data1$positive <- tm_term_score(tdm.corpus, positive)
+data1$negative <- tm_term_score(tdm.corpus, negative)
+data1$score <- data1$positive - data1$negative
+```
+
