@@ -91,4 +91,37 @@ data1$positive <- tm_term_score(tdm.corpus, positive)
 data1$negative <- tm_term_score(tdm.corpus, negative)
 data1$score <- data1$positive - data1$negative
 ```
+Word Cloud
+```{r}
+install.packages("tm")
+library(tm)
+install.packages("wordcloud")
+library(wordcloud)
 
+col=brewer.pal(6,"Dark2")
+wordcloud(corpus, min.freq=10, scale=c(5,2),rot.per = 0.25,
+          random.color=T, max.word=45, random.order=F,colors=col)
+```
+Sentiment Analysis
+```{r}
+positive_score<- sum(data1$positive)
+negative_score<- sum(data1$negative)
+#bar graph: scores
+bar1<-barplot(c(108, 93), main="Sentiment: Score", 
+  	xlab="Sentiment", ylab = "Score", names.arg=c("Positive","Negative"), col=c("lightblue", "mistyrose"))
+text(x = bar1 , y = c(108, 93), label = c(108, 93),pos = 1, cex = 1) 
+
+neutral_number <- length(which(data1$score == 0))
+neutral_number <- length(which(data1$score > 0))
+negative_number <- length(which(data1$score < 0))
+
+#bar graph: number of tweetes
+
+bar2<-barplot(c(68,402,41), main="Sentiment: Number of Tweets", 
+  	xlab="Sentiment", ylab = "Tweets Number", names.arg=c("Positive","Neutral","Negative"), col=c("lightblue", "mistyrose", "lavender"))
+text(x = bar2 , y = c(68,402,41), label = c(68,402,41),pos = 1, cex = 1) 
+
+pmatch(positive,data$text)
+
+allscore<- sum(data1$score)
+#15
