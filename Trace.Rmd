@@ -1,0 +1,28 @@
+---
+title: "Trace"
+author: "Blake"
+date: "10/23/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(plotly)
+d4 <- select(data1, 5, 6, 7, 1)
+d4 <- as.matrix(d4)
+
+ax <- list(
+  title = "Twitter Users",
+  zeroline = FALSE,
+  showline = FALSE,
+  showticklabels = FALSE,
+  showgrid = FALSE)
+  
+p <- plot_ly(x = DT$screenName, y = DT$x, name = "Sentiment Score", type = "bar")  %>%
+  layout(
+    title = "Sentiment Score",
+      yaxis = list(title = "Score"),
+    xaxis = ax
+    )
+
+p 
+```

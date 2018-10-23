@@ -1,0 +1,40 @@
+---
+title: "Analysis"
+author: "Blake"
+date: "10/18/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(leaflet)
+library(lubridate)
+library(maps)
+library(ggthemes)
+library(ggplot2)
+
+d2 <- select(data, 1, 2, 17, 18)
+d3 <- select(data, 1, 2, 6, 17, 18)
+
+d4 <- d3 %>%
+    mutate(Time = as.POSIXct(created)) %>%
+    group_by(lubridate::hour(created), text) %>%
+    summarise(count=n()) %>%
+    arrange(desc(count))
+
+world_basemap <- ggplot() +
+  borders("world", colour = "gray85", fill = "gray80") +
+  theme_map()
+
+world_basemap +
+  geom_point(data = data1, aes(x = lon, y = lat),
+             colour = 'purple', alpha = .5) +
+  scale_size_continuous(range = c(1, 8),
+                        breaks = c(250, 500, 750, 1000)) +
+  labs(title = "Tweet Locations about Elon Musk")
+
+site_locations <- leaflet(d2) %>%
+  addTiles() %>%
+  addCircleMarkers(lng = ~lon, lat = ~lat, popup = ~text,
+                   radius = 3, stroke = FALSE)
+
+```
